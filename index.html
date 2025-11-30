@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>STICKY MOLOCH</title>
+	<link rel="icon" type="image/svg+xml" href="/media/logo-white-transparent.svg">
+	<link href="https://fonts.googleapis.com/css2?family=Lacquer&display=swap" rel="stylesheet">
+	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
+	<script>
+		// Update active nav link based on scroll position
+		window.addEventListener('scroll', function() {
+			const sections = document.querySelectorAll('section, main');
+			const navLinks = document.querySelectorAll('.nav-link');
+			
+			let current = 'home';
+			sections.forEach(section => {
+				const sectionTop = section.offsetTop;
+				const sectionHeight = section.clientHeight;
+				const sectionId = section.getAttribute('id');
+				// Skip gallery section - it should be part of home
+				if (sectionId && sectionId !== 'gallery' && pageYOffset >= sectionTop - 150) {
+					current = sectionId;
+				}
+			});
+			
+			navLinks.forEach(link => {
+				link.classList.remove('active');
+				if (link.getAttribute('href') === '#' + current) {
+					link.classList.add('active');
+				}
+			});
+		});
+		
+		// Fade in collage items on scroll
+		const observerOptions = {
+			threshold: 0.1,
+			rootMargin: '0px 0px -50px 0px'
+		};
+		
+		const observer = new IntersectionObserver(function(entries) {
+			entries.forEach(entry => {
+				if (entry.isIntersecting) {
+					entry.target.classList.add('fade-in');
+				} else {
+					entry.target.classList.remove('fade-in');
+				}
+			});
+		}, observerOptions);
+		
+		window.addEventListener('DOMContentLoaded', function() {
+			const collageItems = document.querySelectorAll('.collage-item');
+			collageItems.forEach((item, index) => {
+				observer.observe(item);
+			});
+			
+			// Volume control
+			const video = document.getElementById('bgVideo');
+			const muteBtn = document.getElementById('muteToggle');
+			
+			// Set volume to 10%
+			video.volume = 0.1;
+			
+			muteBtn.addEventListener('click', function() {
+				if (video.muted) {
+					video.muted = false;
+					muteBtn.textContent = '❚❚';
+				} else {
+					video.muted = true;
+					muteBtn.textContent = '▷';
+				}
+			});
+		});
+		
+		// Reset transition delays based on scroll direction
+		let lastScrollY = window.pageYOffset;
+		window.addEventListener('scroll', function() {
+			const collageItems = document.querySelectorAll('.collage-item');
+			const currentScrollY = window.pageYOffset;
+			const scrollingDown = currentScrollY > lastScrollY;
+			
+			collageItems.forEach((item, index) => {
+				if (scrollingDown) {
+					item.style.transitionDelay = `${index * 0.1}s`;
+				} else {
+					item.style.transitionDelay = `${(collageItems.length - 1 - index) * 0.1}s`;
+				}
+			});
+			
+			lastScrollY = currentScrollY;
+		});
+	</script>
+	<style>
+		body {
+			font-family: 'Lacquer', cursive;
+		}
+		.bw {
+			background-color: #000000;
+			color: #FFFFFF;
+		}
+		.active {
+			background-color: #FFFFFF !important;
+			color: #000000 !important;
+		}
+		main {
+			position: relative;
+			min-height: 100vh;
+			overflow: hidden;
+			padding-top: 70px;
+		}
+		
+		main video {
+			position: fixed;
+			top: 0;
+			left: 0;
+			width: 100%;
+			height: 100%;
+			object-fit: cover;
+			z-index: -1;
+		}
+		
+		main > a,
+		main > div {
+			position: relative;
+			z-index: 1;
+		}
+		
+		.collage {
+		    display: grid;
+		    grid-template-columns: repeat(3, 1fr);
+		    grid-auto-rows: 350px;
+		    gap: 15px;
+		    margin: 0 auto;
+		}
+		
+		.collage-item {
+		    width: 100%;
+		    height: 100%;
+		    object-fit: contain;
+		    opacity: 0;
+		    transform: translateY(30px);
+		    transition: opacity 0.8s ease, transform 0.8s ease;
+		}
+		
+		.collage-item.fade-in {
+		    opacity: 1;
+		    transform: translateY(0);
+		}
+		
+		section {
+			scroll-margin-top: 120px;
+		}
+
+		a {
+			text-decoration: none;
+		}
+		
+		.nav-link:hover {
+			background-color: #000000 !important;
+			color: pink !important;
+		}
+
+		/* Responsive Design */
+		@media (max-width: 768px) {
+			header > div {
+				flex-direction: row;
+			}
+			
+			#navMenu {
+				top: 100%;
+				left: 0;
+				right: 0;
+			}
+			
+			.collage {
+				grid-template-columns: repeat(2, 1fr);
+				grid-auto-rows: 250px;
+				gap: 12px;
+			}
+			
+			h1.display-1 {
+				font-size: 2rem;
+			}
+			
+			h2.display-6 {
+				font-size: 1.25rem;
+			}
+			
+			.container {
+				padding: 0 1rem;
+			}
+			
+			main > a img {
+				height: 200px !important;
+				width: auto;
+			}
+			
+			main video {
+				width: 100vw;
+				height: 100vh;
+				object-fit: cover;
+			}
+		}
+		
+		@media (max-width: 480px) {
+			header > div {
+				padding: 0.5rem;
+			}
+			
+			img[height="70"] {
+				height: 50px !important;
+			}
+			
+			.collage {
+				grid-template-columns: 1fr;
+				grid-auto-rows: 300px;
+				gap: 10px;
+			}
+			
+			h1.display-1 {
+				font-size: 1.5rem;
+			}
+			
+			h2.display-6 {
+				font-size: 1rem;
+			}
+			
+			.btn {
+				width: 100%;
+			}
+		}
+	</style>
+</head>
+<body class="bw">
+	<header class="bw sticky-top" style="position: fixed; top: 0; left: 0; right: 0; z-index: 1030; padding: 0.75rem 1rem;">
+		<div class="d-flex align-items-center position-relative">
+			<a href="/" class="d-flex align-items-center link-body-emphasis text-decoration-none"> 
+				<img src="/media/logo-white.svg" class="bi me-2" width="auto" height="70" alt="logo">
+			</a>
+			
+			<!-- Desktop Navigation -->
+			<ul class="nav nav-pills d-none d-md-flex" id="navMenuDesktop">
+				<li class="nav-item"><a href="#home" class="nav-link active bw" aria-current="page">Home</a></li>
+				<li class="nav-item"><a href="#music" class="nav-link bw">Music</a></li>
+				<li class="nav-item"><a href="#booking" class="nav-link bw">Booking</a></li>
+				<li class="nav-item"><a href="#tech-rider" class="nav-link bw">Tech Rider</a></li>
+			</ul>
+			
+			<!-- Hamburger Menu for Mobile -->
+			<button class="btn d-md-none ms-auto p-0" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu" aria-controls="navMenu" aria-expanded="false" aria-label="Toggle navigation" style="color: #FFFFFF; font-size: 1.5rem; border: none; background: none;">
+				<span>☰</span>
+			</button>
+			
+			<!-- Mobile Navigation Overlay -->
+			<div class="position-absolute w-100 start-0 top-100 collapse d-md-none" id="navMenu" style="z-index: 2000; background-color: rgba(0, 0, 0, 0.95); padding: 1rem;">
+				<div class="d-flex flex-column gap-2">
+					<a href="#home" class="text-white text-decoration-none py-2" onclick="document.getElementById('navMenu').classList.remove('show')">Home</a>
+					<a href="#music" class="text-white text-decoration-none py-2" onclick="document.getElementById('navMenu').classList.remove('show')">Music</a>
+					<a href="#booking" class="text-white text-decoration-none py-2" onclick="document.getElementById('navMenu').classList.remove('show')">Booking</a>
+					<a href="#tech-rider" class="text-white text-decoration-none py-2" onclick="document.getElementById('navMenu').classList.remove('show')">Tech Rider</a>
+				</div>
+			</div>
+		</div>
+	</header>
+	<main id="home" class="d-flex align-items-center justify-content-center flex-column">
+		<video id="bgVideo" autoplay muted loop>
+			<source src="/media/sticky moloch.mp4" type="video/mp4">
+			Your browser does not support the video tag.
+		</video>
+		<a class="d-flex align-items-center text-decoration-none">
+			<img src="/media/logo-white-transparent.png" width="auto" height="400" alt="logo">
+		</a>
+		<div class="text-center">
+			<h1 class="display-4 fw-bold text-white">SBG STINKY HARDCORE</h1>
+			<p class="text-white"><br>
+				NINA: vox<br>
+				FLIEGE: guitar<br>
+				THOMAS: drums
+			</p>
+		</div>
+	</main>
+	<section id="gallery" class="px-4 py-5">
+	    <div class="collage">
+	        <video src="/media/collage/video01.mp4" class="collage-item item1" autoplay muted loop playsinline></video>
+	        <img src="/media/collage/photo01.jpeg" class="collage-item item2" alt="photo1">
+	        <video src="/media/collage/video02.mp4" class="collage-item item3" autoplay muted loop playsinline></video>
+	        <img src="/media/collage/photo02.jpeg" class="collage-item item4" alt="photo2">
+	        <img src="/media/collage/photo03.jpeg" class="collage-item item5" alt="photo3">
+	        <video src="/media/collage/video03.mp4" class="collage-item item6" autoplay muted loop playsinline></video>
+	    </div>
+	</section>
+	<section id="music" class="px-4 py-5 bw">
+		<div class="container">
+			<h2 class="display-4 fw-bold mb-4">Music</h2>
+			<p class="lead mb-3">Listen to our music on Bandcamp:</p>
+			<div class="mb-3">
+				<iframe style="border: 0; width: 100%; height: 120px;" src="https://bandcamp.com/EmbeddedPlayer/album=2987020926/size=large/bgcol=333333/linkcol=ffffff/tracklist=false/artwork=small/transparent=true/" seamless><a href="https://stickymoloch161.bandcamp.com/album/f-rstenbrunn-hardcore">fürstenbrunn hardcore by STICKY MOLOCH</a></iframe>
+			</div>
+			<a href="https://stickymoloch161.bandcamp.com/" target="_blank" class="btn btn-light btn-lg">Visit Bandcamp</a>
+		</div>
+	</section>
+	<section id="booking" class="bw px-4 py-5">
+		<div class="container">
+			<h2 class="display-4 fw-bold mb-4">Booking</h2>
+			<p class="lead mb-3">Contact us for booking inquiries:</p>
+			<p class="fs-5 mb-2"><strong>EMAIL<br></strong> <a class="bw text-decoration-underline" href="mailto:stickymoloch161@gmail.com" target="_blank">stickymoloch161@gmail.com</a></p>
+			<p class="fs-5"><strong>INSTAGRAM<br></strong> <a class="bw text-decoration-underline" href="https://instagram.com/stickymoloch" target="_blank">@stickymoloch</a></p>
+		</div>
+	</section>
+	<section id="tech-rider" class="bw px-4 py-5" style="padding-bottom: 20rem !important;">
+		<div class="container">
+			<h2 class="display-4 fw-bold mb-4">Tech Rider</h2>
+			<p class="lead mb-3">Technical requirements</p>
+			<ul class="fs-5 list-unstyled">
+				<li class="mb-2"><strong>DRUM KIT<br></strong> Two toms (floor tom + at least 1 hanging tom), hihat stand, four cymbal stands, and a snare drum</li>
+				<li class="mb-2"><strong>MONITOR<br></strong> So the drummer can hear vocals</li>
+				<li class="mb-2"><strong>AMP<br></strong> For guitar</li>
+				<li class="mb-2"><strong>MICROPHONES<br></strong> Two microphones and one mic stand</li>
+				<li><strong>WE BRING<br></strong> Pedals and cymbals</li>
+			</ul>
+		</div>
+	</section>
+	<footer class="sticky-bottom py-3 px-4 bw" style="display: grid; grid-template-columns: 1fr auto; gap: 10px; align-items: center;">
+		<p class="m-0">&copy; STICKY MOLOCH - Fürstenbrunner Hardcore</p>
+		<button id="muteToggle" class="btn btn-sm" style="color: #FFFFFF; border: 1px solid #FFFFFF; font-size: 0.75rem; padding: 0.25rem 0.5rem; white-space: nowrap;">
+			▷
+		</button>
+	</footer>
+</body>
+</html>
