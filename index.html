@@ -7,118 +7,31 @@
 	<link rel="icon" type="image/svg+xml" href="/media/logo-white-transparent.svg">
 	<link href="https://fonts.googleapis.com/css2?family=Lacquer&display=swap" rel="stylesheet">
 	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+	<link href="/css/styles.css" rel="stylesheet">
 	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
+	<script src="/js/main.js"></script>
 	<script>
-		// Update active nav link based on scroll position
-		window.addEventListener('scroll', function() {
-			const sections = document.querySelectorAll('section, main');
-			const navLinks = document.querySelectorAll('.nav-link');
-			
-			let current = 'home';
-			sections.forEach(section => {
-				const sectionTop = section.offsetTop;
-				const sectionHeight = section.clientHeight;
-				const sectionId = section.getAttribute('id');
-				// Skip gallery section - it should be part of home
-				if (sectionId && sectionId !== 'gallery' && pageYOffset >= sectionTop - 150) {
-					current = sectionId;
-				}
-			});
-			
-			navLinks.forEach(link => {
-				link.classList.remove('active');
-				if (link.getAttribute('href') === '#' + current) {
-					link.classList.add('active');
-				}
-			});
-		});
-		
-		// Fade in collage items on scroll
-		const observerOptions = {
-			threshold: 0.1,
-			rootMargin: '0px 0px -50px 0px'
-		};
-		
-		const observer = new IntersectionObserver(function(entries) {
-			entries.forEach(entry => {
-				if (entry.isIntersecting) {
-					entry.target.classList.add('fade-in');
-				} else {
-					entry.target.classList.remove('fade-in');
-				}
-			});
-		}, observerOptions);
-		
 		window.addEventListener('DOMContentLoaded', function() {
-			const collageItems = document.querySelectorAll('.collage-item');
-			collageItems.forEach((item, index) => {
-				observer.observe(item);
-			});
+			// Initialize nav tracking
+			initNavTracking();
 			
-			// Volume control
-			const video = document.getElementById('bgVideo');
-			const muteBtn = document.getElementById('muteToggle');
+			// Initialize media items
+			const mediaItems = document.querySelectorAll('.media-item');
+			mediaItems.forEach(item => observer.observe(item));
 			
-			// Set volume to 10%
-			video.volume = 0.1;
-			
-			muteBtn.addEventListener('click', function() {
-				if (video.muted) {
-					video.muted = false;
-					muteBtn.textContent = '❚❚';
-				} else {
-					video.muted = true;
-					muteBtn.textContent = '▷';
-				}
-			});
-		});
-		
-		// Reset transition delays based on scroll direction
-		let lastScrollY = window.pageYOffset;
-		window.addEventListener('scroll', function() {
-			const collageItems = document.querySelectorAll('.collage-item');
-			const currentScrollY = window.pageYOffset;
-			const scrollingDown = currentScrollY > lastScrollY;
-			
-			collageItems.forEach((item, index) => {
-				if (scrollingDown) {
-					item.style.transitionDelay = `${index * 0.1}s`;
-				} else {
-					item.style.transitionDelay = `${(collageItems.length - 1 - index) * 0.1}s`;
-				}
-			});
-			
-			lastScrollY = currentScrollY;
-		});
+		// Initialize features
+		initVolumeControl();
+		initScrollAnimations('.media-item');
+		loadNextShow();
+		loadGallery('.collage', 3); // Show first 3 items in preview
+	});
 	</script>
 	<style>
-		body {
-			font-family: 'Lacquer', cursive;
-		}
-		.bw {
-			background-color: #000000;
-			color: #FFFFFF;
-		}
-		.active {
-			background-color: #FFFFFF !important;
-			color: #000000 !important;
-		}
 		main {
 			position: relative;
 			min-height: 100vh;
 			overflow: hidden;
 			padding-top: 70px;
-		}
-		
-		main video {
-			position: fixed;
-			top: 0;
-			left: 0;
-			width: 100%;
-			height: 100%;
-			object-fit: cover;
-			z-index: -1;
-			pointer-events: none;
 		}
 		
 		main > a,
@@ -127,42 +40,11 @@
 			z-index: 1;
 		}
 		
-		.collage {
-		    display: grid;
-		    grid-template-columns: repeat(3, 1fr);
-		    grid-auto-rows: 350px;
-		    gap: 15px;
-		    margin: 0 auto;
-		}
-		
-		.collage-item {
-		    width: 100%;
-		    height: 100%;
-		    object-fit: contain;
-		    opacity: 0;
-		    transform: translateY(30px);
-		    transition: opacity 0.8s ease, transform 0.8s ease;
-		}
-		
-		.collage-item.fade-in {
-		    opacity: 1;
-		    transform: translateY(0);
-		}
-		
 		section {
 			scroll-margin-top: 120px;
 		}
 
-		a {
-			text-decoration: none;
-		}
-		
-		.nav-link:hover {
-			background-color: #000000 !important;
-			color: pink !important;
-		}
-
-		/* Responsive Design */
+		/* Page-specific responsive */
 		@media (max-width: 768px) {
 			header > div {
 				flex-direction: row;
@@ -172,12 +54,6 @@
 				top: 100%;
 				left: 0;
 				right: 0;
-			}
-			
-			.collage {
-				grid-template-columns: repeat(2, 1fr);
-				grid-auto-rows: 250px;
-				gap: 12px;
 			}
 			
 			h1.display-1 {
@@ -196,12 +72,6 @@
 				height: 200px !important;
 				width: auto;
 			}
-			
-			main video {
-				width: 100vw;
-				height: 100vh;
-				object-fit: cover;
-			}
 		}
 		
 		@media (max-width: 480px) {
@@ -211,12 +81,6 @@
 			
 			img[height="70"] {
 				height: 50px !important;
-			}
-			
-			.collage {
-				grid-template-columns: 1fr;
-				grid-auto-rows: 300px;
-				gap: 10px;
 			}
 			
 			h1.display-1 {
@@ -265,7 +129,7 @@
 		</div>
 	</header>
 	<main id="home" class="d-flex align-items-center justify-content-center flex-column">
-		<video id="bgVideo" autoplay muted loop playsinline webkit-playsinline>
+		<video id="bgVideo" class="bg-video" autoplay muted loop playsinline webkit-playsinline>
 			<source src="/media/sticky_moloch.mp4" type="video/mp4">
 			Your browser does not support the video tag.
 		</video>
@@ -282,13 +146,28 @@
 		</div>
 	</main>
 	<section id="gallery" class="px-4 py-5">
-	    <div class="collage">
-	        <video src="/media/collage/video01.mp4" class="collage-item item1" autoplay muted loop playsinline></video>
-	        <img src="/media/collage/photo01.jpeg" class="collage-item item2" alt="photo1">
-	        <video src="/media/collage/video02.mp4" class="collage-item item3" autoplay muted loop playsinline></video>
-	        <img src="/media/collage/photo02.jpeg" class="collage-item item4" alt="photo2">
-	        <img src="/media/collage/photo03.jpeg" class="collage-item item5" alt="photo3">
-	        <video src="/media/collage/video03.mp4" class="collage-item item6" autoplay muted loop playsinline></video>
+	    <div class="collage media-grid">
+	        <!-- Gallery items loaded dynamically -->
+	    </div>
+	    <div class="text-center mt-4">
+	        <a href="/gallery.html" class="btn btn-light">View Full Gallery</a>
+	    </div>
+	    
+	    <!-- Next Show Section -->
+	    <div class="next-show-container mt-5">
+	        <div class="next-show-card">
+	            <h3 class="next-show-title">Next Show</h3>
+	            <div class="next-show-content">
+	                <div class="next-show-image">
+	                    <img id="nextShowImage" src="" alt="Next Show Poster">
+	                </div>
+	                <div class="next-show-details">
+	                    <h4 id="nextShowName">Loading...</h4>
+	                    <p id="nextShowDate">-</p>
+	                    <a id="nextShowLink" href="#" target="_blank" class="btn btn-dark mt-2">Event Details</a>
+	                </div>
+	            </div>
+	        </div>
 	    </div>
 	</section>
 	<section id="music" class="px-4 py-5 bw">
@@ -306,7 +185,32 @@
 			<h2 class="display-4 fw-bold mb-4">Booking</h2>
 			<p class="lead mb-3">Contact us for booking inquiries:</p>
 			<p class="fs-5 mb-2"><strong>EMAIL<br></strong> <a class="bw text-decoration-underline" href="mailto:stickymoloch161@gmail.com" target="_blank">stickymoloch161@gmail.com</a></p>
-			<p class="fs-5"><strong>INSTAGRAM<br></strong> <a class="bw text-decoration-underline" href="https://instagram.com/stickymoloch" target="_blank">@stickymoloch</a></p>
+			<p class="fs-5 mb-4"><strong>INSTAGRAM<br></strong> <a class="bw text-decoration-underline" href="https://instagram.com/stickymoloch" target="_blank">@stickymoloch</a></p>
+			<div class="row">
+				<div class="col-12 col-md-6">
+					<blockquote class="instagram-media" data-instgrm-permalink="https://www.instagram.com/stickymoloch/" data-instgrm-version="14" style="background:#000; border:0; border-radius:3px; box-shadow:0 0 1px 0 rgba(0,0,0,0.5),0 1px 10px 0 rgba(0,0,0,0.15); margin: 1px 1px 1px 0; max-width:540px; min-width:326px; padding:0; width:99.375%; width:-webkit-calc(100% - 2px); width:calc(100% - 2px);">
+						<div style="padding:16px;">
+							<a href="https://www.instagram.com/stickymoloch/" style="background:#FFFFFF; line-height:0; padding:0 0; text-align:center; text-decoration:none; width:100%;" target="_blank">
+								<div style="display: flex; flex-direction: row; align-items: center;">
+									<div style="background-color: #F4F4F4; border-radius: 50%; flex-grow: 0; height: 40px; margin-right: 14px; width: 40px;"></div>
+									<div style="display: flex; flex-direction: column; flex-grow: 1; justify-content: center;">
+										<div style="background-color: #F4F4F4; border-radius: 4px; flex-grow: 0; height: 14px; margin-bottom: 6px; width: 100px;"></div>
+										<div style="background-color: #F4F4F4; border-radius: 4px; flex-grow: 0; height: 14px; width: 60px;"></div>
+									</div>
+								</div>
+								<div style="padding: 19% 0;"></div>
+								<div style="display:block; height:50px; margin:0 auto 12px; width:50px;">
+									<svg width="50px" height="50px" viewBox="0 0 60 60" version="1.1" xmlns="https://www.w3.org/2000/svg"><g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd"><g transform="translate(-511.000000, -20.000000)" fill="#000000"><g><path d="M556.869,30.41 C554.814,30.41 553.148,32.076 553.148,34.131 C553.148,36.186 554.814,37.852 556.869,37.852 C558.924,37.852 560.59,36.186 560.59,34.131 C560.59,32.076 558.924,30.41 556.869,30.41 M541,60.657 C535.114,60.657 530.342,55.887 530.342,50 C530.342,44.114 535.114,39.342 541,39.342 C546.887,39.342 551.658,44.114 551.658,50 C551.658,55.887 546.887,60.657 541,60.657 M541,33.886 C532.1,33.886 524.886,41.1 524.886,50 C524.886,58.899 532.1,66.113 541,66.113 C549.9,66.113 557.115,58.899 557.115,50 C557.115,41.1 549.9,33.886 541,33.886 M565.378,62.101 C565.244,65.022 564.756,66.606 564.346,67.663 C563.803,69.06 563.154,70.057 562.106,71.106 C561.058,72.155 560.06,72.803 558.662,73.347 C557.607,73.757 556.021,74.244 553.102,74.378 C549.944,74.521 548.997,74.552 541,74.552 C533.003,74.552 532.056,74.521 528.898,74.378 C525.979,74.244 524.393,73.757 523.338,73.347 C521.94,72.803 520.942,72.155 519.894,71.106 C518.846,70.057 518.197,69.06 517.654,67.663 C517.244,66.606 516.755,65.022 516.623,62.101 C516.479,58.943 516.448,57.996 516.448,50 C516.448,42.003 516.479,41.056 516.623,37.899 C516.755,34.978 517.244,33.391 517.654,32.338 C518.197,30.938 518.846,29.942 519.894,28.894 C520.942,27.846 521.94,27.196 523.338,26.654 C524.393,26.244 525.979,25.756 528.898,25.623 C532.057,25.479 533.004,25.448 541,25.448 C548.997,25.448 549.943,25.479 553.102,25.623 C556.021,25.756 557.607,26.244 558.662,26.654 C560.06,27.196 561.058,27.846 562.106,28.894 C563.154,29.942 563.803,30.938 564.346,32.338 C564.756,33.391 565.244,34.978 565.378,37.899 C565.522,41.056 565.552,42.003 565.552,50 C565.552,57.996 565.522,58.943 565.378,62.101 M570.82,37.631 C570.674,34.438 570.167,32.258 569.425,30.349 C568.659,28.377 567.633,26.702 565.965,25.035 C564.297,23.368 562.623,22.342 560.652,21.575 C558.743,20.834 556.562,20.326 553.369,20.18 C550.169,20.033 549.148,20 541,20 C532.853,20 531.831,20.033 528.631,20.18 C525.438,20.326 523.257,20.834 521.349,21.575 C519.376,22.342 517.703,23.368 516.035,25.035 C514.368,26.702 513.342,28.377 512.574,30.349 C511.834,32.258 511.326,34.438 511.181,37.631 C511.035,40.831 511,41.851 511,50 C511,58.147 511.035,59.17 511.181,62.369 C511.326,65.562 511.834,67.743 512.574,69.651 C513.342,71.625 514.368,73.296 516.035,74.965 C517.703,76.634 519.376,77.658 521.349,78.425 C523.257,79.167 525.438,79.673 528.631,79.82 C531.831,79.965 532.853,80.001 541,80.001 C549.148,80.001 550.169,79.965 553.369,79.82 C556.562,79.673 558.743,79.167 560.652,78.425 C562.623,77.658 564.297,76.634 565.965,74.965 C567.633,73.296 568.659,71.625 569.425,69.651 C570.167,67.743 570.674,65.562 570.82,62.369 C570.966,59.17 571,58.147 571,50 C571,41.851 570.966,40.831 570.82,37.631"></path></g></g></g></svg>
+								</div>
+								<div style="padding-top: 8px;">
+									<div style="color:#3897f0; font-family:Arial,sans-serif; font-size:14px; font-style:normal; font-weight:550; line-height:18px;">View this profile on Instagram</div>
+								</div>
+							</a>
+						</div>
+					</blockquote>
+					<script async src="//www.instagram.com/embed.js"></script>
+				</div>
+			</div>
 		</div>
 	</section>
 	<section id="tech-rider" class="bw px-4 py-5" style="padding-bottom: 20rem !important;">
@@ -328,8 +232,11 @@
 			▷
 		</button>
 	</footer>
+	
+	<!-- Lightbox Modal -->
+	<div id="lightbox">
+		<div id="lightboxClose">&times;</div>
+		<div id="lightboxContent"></div>
+	</div>
 </body>
-
 </html>
-
-
